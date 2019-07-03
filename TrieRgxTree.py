@@ -46,7 +46,7 @@ class TrieRgxNode:
                         exist = True
                 if not exist:
                     rgx_node = TrieRgxNode()
-                    rgx_node.rgx = rgx_char
+                    rgx_node.rgx = re.compile(rgx_char)
                     current.rgx_nodes.append(rgx_node)
                 current = rgx_node
                 idx_word = rgx_end_idx + 1
@@ -84,7 +84,7 @@ class TrieRgxNode:
                 stack.append(node.nodes[current_char_idx])
             if node.rgx_nodes:
                 for rgx_node in node.rgx_nodes:
-                    match = re.match(rgx_node.rgx, word, idx_word)
+                    match = rgx_node.rgx.match(word, idx_word)
                     if match:
                         stack.append(match.end())
                         stack.append(rgx_node)
@@ -98,6 +98,7 @@ if __name__ == '__main__':
     initial_char_map()
     tree = TrieRgxTree()
     tree.insert(r'12def/ghi', 20)
-    tree.insert(r'12<\d+>', 10)
-    assert tree.search('12456') == 10
+    tree.insert(r'12<\d+>abc', 10)
+    assert tree.search('12456abc') == 10
     assert tree.search('12def/ghi') == 20
+    assert tree.search('12abc') == -1
