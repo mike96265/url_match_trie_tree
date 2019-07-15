@@ -1,3 +1,6 @@
+// created by luvjoey 2019/7/13
+// gcc -fPIC -shared -o libtrigx_tree.so -lpcre trigx_tree.c
+
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
