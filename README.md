@@ -3,7 +3,7 @@
 
 limitation:
 - support trie character: string.digits string.ascii_letters '/' '-', escape character: '<' '>'
-- it would be better that the url-match-string are original split by '/'. like **'/post/page/<\d+>'**, which won't cause a ambiguity match. if u insert **'/abc/<\d+>1'** and search value by **'/abc/1231'**, in this case the return value is url-match-string **/abc/<\d+>** inserted, which may unexpected by u.
+- it would be better that the url-match-string are original split by '/'. like **'/post/page/<\d+>'**, which won't cause a ambiguity match. if u insert **'/abc/<\d+>1'** and search value by **'/abc/1231'**, in this case the return value is url-match-string **/abc/<\d+>** inserted, which unexpect.
 
 
 you can add more supported character by modify variable alphabet and char_map
