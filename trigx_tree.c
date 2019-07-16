@@ -1,6 +1,3 @@
-// created by luvjoey 2019/7/13
-// gcc -fPIC -shared -o libtrigx_tree.so -lpcre trigx_tree.c
-
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -172,12 +169,11 @@ int index_alphabet_char(char c) {
 }
 
 TrigxNode *create_trigx_node() {
-    TrigxNode *node = (TrigxNode *) malloc(sizeof(TrigxNode));
+    TrigxNode *node = (TrigxNode *) calloc(sizeof(TrigxNode), sizeof(char));
     node->rgx_raw_len = 0;
     node->rgx = NULL;
     node->val = -1;
     node->rgx_next = NULL;
-    node->re = NULL;
     return node;
 }
 
@@ -229,9 +225,6 @@ void trigx_insert(TrigxNode *root, const char *word, int len_word, int val) {
                 rgx_node = create_trigx_node();
                 rgx_node->rgx = rgx;
                 rgx_node->rgx_next = current->rgx_next;
-                const char *error;
-                int error_offset;
-                rgx_node->re = pcre_compile(rgx_node->rgx, 0, &error, &error_offset, NULL);
                 current->rgx_next = rgx_node;
             }
             current = rgx_node;
@@ -253,7 +246,7 @@ void trigx_insert(TrigxNode *root, const char *word, int len_word, int val) {
     current->val = val;
 }
 
-int trigx_search(TrigxNode *root, const char *word, int word_len) {
+int trigx_search(TrigxNode *root, const char *word, int len_word) {
     IStack *istack = create_istack();
     Stack *stack = create_stack();
     istack_push(istack, 0);
@@ -261,7 +254,7 @@ int trigx_search(TrigxNode *root, const char *word, int word_len) {
     while (stack->top != -1) {
         TrigxNode *node = (TrigxNode *) stack_pop(stack);
         int idx_word = istack_pop(istack);
-        if (idx_word == word_len) {
+        if (idx_word == len_word) {
             if (node->val != -1) {
                 return node->val;
             } else {
@@ -280,8 +273,12 @@ int trigx_search(TrigxNode *root, const char *word, int word_len) {
         }
         TrigxNode *current_rgx_node = node->rgx_next;
         while (current_rgx_node != NULL) {
+            const char *error;
+            int error_offset;
+            pcre *re = pcre_compile(current_rgx_node->rgx, 0, &error, &error_offset, NULL);
             int vector[3];
-            int rc = pcre_exec(current_rgx_node->re, NULL, word, word_len, idx_word, 0, vector, 3);
+            int rc = pcre_exec(re, NULL, word, len_word, idx_word, 0, vector, 3);
+            pcre_free(re);
             if (rc < 0) {
                 current_rgx_node = current_rgx_node->rgx_next;
             } else {
@@ -315,7 +312,6 @@ void trigx_free(TrigxNode *root) {
         }
         if (node->rgx_raw_len != 0) {
             free(node->rgx);
-            pcre_free(node->re);
         }
     }
     stack_free(stack);
